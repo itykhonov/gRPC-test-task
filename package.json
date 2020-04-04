@@ -1,0 +1,21 @@
+{
+  "name": "grpc-test-task",
+  "version": "0.0.1",
+  "scripts": {
+    "run-server": "node server.ts",
+    "run-client": "node client.ts",
+    "run-test": "npm test",
+    "test": "jest"
+  },
+  "jest": {},
+  "dependencies": {
+    "@grpc/proto-loader": "^0.1.0",
+    "async": "^1.5.2",
+    "google-protobuf": "^3.0.0",
+    "grpc": "^1.11.0"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "jest": "^25.2.6"
+  }
+}

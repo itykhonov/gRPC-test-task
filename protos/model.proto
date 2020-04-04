@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package userscontroller;
+
+// Interface exported by the server.
+service UsersController {
+    rpc GetData(EmptyParams) returns (UserDatas) {}
+    rpc CreateUser(User) returns (UserData) {}
+    rpc UpdateUser(User) returns (UserData) {}
+    rpc DeleteUser(User) returns (UserData) {}
+    rpc AddFriendshipBtwUsers(Users) returns (UserDatas) {}
+    rpc DeleteFrienshipBtwUsers(Users) returns (UserDatas) {}
+
+    // A server-to-client streaming RPC.
+    rpc GetDataUpdates(EmptyParams) returns (stream Event) {}
+}
+
+message Event {
+    enum Type {
+        CREATED_USER = 0;
+        UPDATED_USER = 1;
+        DELETED_USER = 2;
+        CREATED_LINK = 3;
+        DELETED_LINK = 4;
+    }
+    Type type = 1;
+    repeated UserData data = 2;
+}
+
+message User {
+    string name = 1;
+    optional string id = 2;
+}
+
+message UserData {
+    User user = 1;
+    repeated User friends = 2;
+}
+
+message UserDatas {
+    repeated UserData userDatas = 1;
+}
+
+message Users {
+    repeated User users = 1;
+}
+
+message EmptyParams {}
