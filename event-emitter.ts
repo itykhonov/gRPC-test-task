@@ -7,6 +7,7 @@ class EventEmitter {
     }
 
     dispatch (event) {
+        console.log(event.type);
         this.dispatchers.forEach(d => d.write(event));
     }
 }
