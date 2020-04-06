@@ -1,7 +1,9 @@
-var PROTO_PATH = __dirname + '/protos/model.proto';
+var path = require('path');
 var StorageInst = require('./graph.ts').StorageService;
 var EE = require('./event-emitter.ts').EventEmitter;
 var FileServiceInst = require('./file-service.ts').FileService;
+
+var PROTO_PATH = path.resolve(__dirname + '/../protos/model.proto');
 
 var grpc = require('grpc');
 var protoLoader = require('@grpc/proto-loader');

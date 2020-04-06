@@ -1,6 +1,6 @@
 var fs = require('fs');
 var path = require('path');
-var sroragePath = 'storage.json';
+var sroragePath = '../db/storage.json';
 
 class FileService {
     readData(callback) {

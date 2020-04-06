@@ -2,8 +2,8 @@
   "name": "grpc-test-task",
   "version": "0.0.1",
   "scripts": {
-    "run-server": "node server.ts",
-    "run-client": "node client.ts",
+    "run-server": "cd server && node server.ts",
+    "run-client": "cd client && node client.ts",
     "run-test": "npm test",
     "test": "jest"
   },

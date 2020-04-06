@@ -1,7 +1,9 @@
-var PROTO_PATH = __dirname + '/protos/model.proto';
-var async = require('async');
+var path = require('path');
 var grpc = require('grpc');
 var protoLoader = require('@grpc/proto-loader');
+
+var PROTO_PATH = path.resolve(__dirname + '/../protos/model.proto');
+
 var packageDefinition = protoLoader.loadSync(
     PROTO_PATH,
     {
