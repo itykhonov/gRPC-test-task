@@ -1,6 +1,6 @@
-const path = require('path');
-const grpc = require('grpc');
-const protoLoader = require('@grpc/proto-loader');
+import * as path from "path";
+import * as grpc from "grpc";
+import * as protoLoader from "@grpc/proto-loader";
 
 const PROTO_PATH: string = path.resolve(__dirname + '/../static/model.proto');
 
@@ -13,7 +13,7 @@ const packageDefinition: any = protoLoader.loadSync(
         defaults: true,
         oneofs: true
     });
-const usersController: any = grpc.loadPackageDefinition(packageDefinition).userscontroller.UsersController;
+const usersController: any = grpc.loadPackageDefinition(packageDefinition).userscontroller;
 
 class ClientService {
     public client;
@@ -253,17 +253,17 @@ class ClientService {
 }
 
 function main(): void {
-    const client: any = new ClientService(usersController);
+    const client: any = new ClientService(usersController.UsersController);
     client.getDataUpdates();
     client.getDataOnConnect(
         client.applyInterestingScenario.bind(client)
     );
 }
 
-if (require.main === module) {
-  main();
-}
+main();
 
+
+// interfaces
 export interface IUserData {
     user: IUser;
     friends: IUser[];

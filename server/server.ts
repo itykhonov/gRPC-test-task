@@ -1,10 +1,9 @@
-const path = require('path');
-const grpc = require('grpc');
-const protoLoader = require('@grpc/proto-loader');
-
 import { EventEmitter } from './event-emitter';
 import { StorageService } from './graph';
 import { IResponse } from './file-service';
+import * as path from "path";
+import * as grpc from "grpc";
+import * as protoLoader from "@grpc/proto-loader";
 
 const PROTO_PATH: string = path.resolve(__dirname + '/../static/model.proto');
 const packageDefinition: any = protoLoader.loadSync(
@@ -75,7 +74,7 @@ export class ServerService {
 function getServer(): any {
     const server: any = new grpc.Server();
     const serverClassInst: ServerService = new ServerService();
-    server.addProtoService(usersController.UsersController.service, {
+    server.addService(usersController.UsersController.service, {
         createUser: serverClassInst.createUser.bind(serverClassInst),
         updateUser: serverClassInst.updateUser.bind(serverClassInst),
         deleteUser: serverClassInst.deleteUser.bind(serverClassInst),
@@ -87,9 +86,7 @@ function getServer(): any {
     return server;
 }
 
-if (require.main === module) {
-    // If this is run as a script, start a server on an unused port
-    const grpcServer: any = getServer();
-    grpcServer.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
-    grpcServer.start();
-}
+// If this is run as a script, start a server on an unused port
+const grpcServer: any = getServer();
+grpcServer.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
+grpcServer.start();
