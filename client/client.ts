@@ -1,10 +1,10 @@
-var path = require('path');
-var grpc = require('grpc');
-var protoLoader = require('@grpc/proto-loader');
+const path = require('path');
+const grpc = require('grpc');
+const protoLoader = require('@grpc/proto-loader');
 
-var PROTO_PATH = path.resolve(__dirname + '/../protos/model.proto');
+const PROTO_PATH: string = path.resolve(__dirname + '/../static/model.proto');
 
-var packageDefinition = protoLoader.loadSync(
+const packageDefinition: any = protoLoader.loadSync(
     PROTO_PATH,
     {
         keepCase: true,
@@ -13,58 +13,59 @@ var packageDefinition = protoLoader.loadSync(
         defaults: true,
         oneofs: true
     });
-var usersController = grpc.loadPackageDefinition(packageDefinition).userscontroller.UsersController;
+const usersController: any = grpc.loadPackageDefinition(packageDefinition).userscontroller.UsersController;
 
 class ClientService {
-    client;
-    users = [];
-    constructor(clientInst) {
+    public client;
+    private users: IUserData[] = [];
+
+    public constructor(clientInst: any) {
         this.client = new clientInst('localhost:50051', grpc.credentials.createInsecure());
     }
 
-    getDataOnConnect(callback = () => {}) {
-        var getDataCallback = (error, usersData) => {
+    public getDataOnConnect(callback?: () => void): void {
+        const getDataCallback = (error: Error, { results }: IResponse) => {
             if (error) {
                 this.callbackFunc(callback, error);
                 return;
             }
-            this.users = usersData.userDatas;
+            this.users = results;
             console.log('getData', this.users)
             this.callbackFunc(callback);
         }
         this.client.getData({}, getDataCallback);
     }
     
-    getDataUpdates() {
+    getDataUpdates(): void {
         this.client.getDataUpdates({}).on('data', this.onDataUpdated.bind(this));
     }
     
-    onDataUpdated(event) {
-        switch (event.type) {
+    onDataUpdated({type, data }: IEvent): void {
+        switch (type) {
             case 'CREATED_USER':
-                console.log('User created - ' , event.data[0]);
-                this.users.push(event.data[0]);
+                console.log('User created - ' , data[0]);
+                this.users.push(data[0]);
                 break;
             case 'UPDATED_USER':
-                console.log('User updated - ' , event.data[0]);
-                this.users = this.users.map(u => {
-                    if (u.user.id === event.data[0].user.id) {
-                        return event.data[0];
+                console.log('User updated - ' , data[0]);
+                this.users = this.users.map((u: IUserData) => {
+                    if (u.user.id === data[0].user.id) {
+                        return data[0];
                     }
                     return u;
                 });
                 break;
             case 'DELETED_USER':
-                console.log('User deleted - ' , event.data[0]);
-                this.users = this.users.filter(u => {
-                    u.friends = u.friends.filter(f => f.id !== event.data[0].user.id);
-                    return u.user.id !== event.data[0].user.id;
+                console.log('User deleted - ' , data[0]);
+                this.users = this.users.filter((u: IUserData) => {
+                    u.friends = u.friends.filter((f: IUser) => f.id !== data[0].user.id);
+                    return u.user.id !== data[0].user.id;
                 });
                 break;
             case 'CREATED_LINK':
-                console.log('Created link btw users - ' , event.data);
-                this.users = this.users.map(u => {
-                    var currentUser = event.data.find(d => d.user.id === u.user.id);
+                console.log('Created link btw users - ' , data);
+                this.users = this.users.map((u: IUserData) => {
+                    const currentUser = data.find((d: IUserData) => d.user.id === u.user.id);
                     if (currentUser) {
                         return currentUser;
                     }
@@ -72,9 +73,9 @@ class ClientService {
                 });
                 break;
             case 'DELETED_LINK':
-                console.log('Deleted link btw users - ' , event.data);
-                this.users = this.users.map(u => {
-                    var currentUser = event.data.find(d => d.user.id === u.user.id);
+                console.log('Deleted link btw users - ' , data);
+                this.users = this.users.map((u: IUserData) => {
+                    const currentUser: IUserData = data.find((d: IUserData) => d.user.id === u.user.id);
                     if (currentUser) {
                         return currentUser;
                     }
@@ -86,8 +87,8 @@ class ClientService {
         }
     }
     
-    createUserNode(callback = () => {}) {
-        var createCallback = (error, user) => {
+    public createUserNode(callback?: () => void): void {
+        const createCallback: (error: Error, response: IResponse) => void = (error, response) => {
             if (error) {
                 this.callbackFunc(callback, error);
                 return;
@@ -97,13 +98,13 @@ class ClientService {
         this.client.createUser(this.getUser(), createCallback);
     }
     
-    updateUserNode(callback = () => {}) {
+    public updateUserNode(callback?: () => void): void {
         if (!this.users.length) {
             console.log('You do not have users to update');
             this.callbackFunc(callback);
             return;
         }
-        var updateCallback = (error, user) => {
+        const updateCallback: (error: Error, response: IResponse) => void = (error, response) => {
             if (error) {
                 this.callbackFunc(callback, error);
                 return;
@@ -119,13 +120,13 @@ class ClientService {
         );
     }
     
-    deleteUserNode(callback = () => {}) {
+    public deleteUserNode(callback?: () => void): void {
         if (!this.users.length) {
             console.log('You should add minimum 1 user instances before delete one');
             this.callbackFunc(callback);
             return;
         }
-        var deleteCallback = (error, users) => {
+        const deleteCallback: (error: Error, response: IResponse) => void = (error, response) => {
             if (error) {
                 this.callbackFunc(callback, error);
                 return;
@@ -135,17 +136,17 @@ class ClientService {
         this.client.deleteUser(this.getRandomUser(this.users), deleteCallback);
     }
     
-    deleteLinkBtwUsers(callback = () => {}) {
-        var deleteFrienshipBtwUsersCallback = (error, users) => {
+    public deleteLinkBtwUsers(callback?: () => void): void {
+        const deleteFrienshipBtwUsersCallback: (error: Error, response: IResponse) => void = (error, response) => {
             if (error) {
                 this.callbackFunc(callback, error);
                 return;
             }
             this.callbackFunc(callback);
         }
-        var userWithFriend = this.getRandomUserWithFriend(this.users);
+        const userWithFriend: IUserData = this.getRandomUserWithFriend(this.users);
         if (userWithFriend) {
-            var friend = userWithFriend.friends[0];
+            const friend: IUser = userWithFriend.friends[0];
             this.client.deleteFrienshipBtwUsers(
                 { users: [userWithFriend.user, friend]},
                 deleteFrienshipBtwUsersCallback
@@ -156,66 +157,31 @@ class ClientService {
         }
     }
     
-    addLinkBtwUsers(callback = () => {}) {
+    public addLinkBtwUsers(callback?: () => void): void {
         if (this.users.length < 2) {
             console.log('You should add minimum 2 user instances before add a link btw them');
             this.callbackFunc(callback);
             return;
         }
-        var addFriendshipBtwUsersCallback = (error, user) => {
+        const addFriendshipBtwUsersCallback: (error: Error, response: IResponse) => void = (error, response) => {
             if (error) {
                 this.callbackFunc(callback, error);
                 return;
             }
             this.callbackFunc(callback);
         }
-        var firstUser = this.getRandomUser(this.users);
-        var secondUser = this.getRandomUser(this.users.filter(u => u.user.id !== firstUser.id));
+        const firstUser = this.getRandomUser(this.users);
+        const secondUser = this.getRandomUser(this.users.filter(u => u.user.id !== firstUser.id));
         this.client.addFriendshipBtwUsers(
             { users: [firstUser, secondUser]},
             addFriendshipBtwUsersCallback
         );
     }
     
-    getRandomUserWithFriend(users) {
-        return users.find(u => u.friends && u.friends.length)
-    }
-    
-    getRandomUser(users) {
-        return users[this.getRandomIntInclusive(0, users.length - 1)].user;
-    }
-    
-    getUser() {
-        return {
-            name: 'user name ' + this.getRandomIntInclusive(1, 100)
-        };
-    }
-    
-    getNameToUpdate() {
-        return {
-            name: 'updated name ' + this.getRandomIntInclusive(1, 100)
-        };
-    }
-    
-    getRandomIntInclusive(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    
-    callbackFunc(callback, error = null) {
-        if (error) {
-            console.error('error ', error);
-        }
-        if (callback && typeof callback === 'function') {
-            callback(error);
-        }
-    }
-    
-    applyInterestingScenario() {
-        var timer;
+    public applyInterestingScenario(): void {
+        let timer: ReturnType<typeof setTimeout>;
         
-        var startAddUsers = () => {
+        const startAddUsers: () => void = () => {
             clearInterval(timer);
             timer = setInterval(() => {
                 this.createUserNode(() => {
@@ -231,7 +197,7 @@ class ClientService {
             }, 5000);
         }
     
-        var startRemoveUsers = () => {
+        const startRemoveUsers: () => void = () => {
             clearInterval(timer);
             timer = setInterval(() => {
                 this.deleteUserNode(() => {
@@ -249,10 +215,45 @@ class ClientService {
             startRemoveUsers();
         }
     }
+    
+    private getRandomUserWithFriend(users: IUserData[]): IUserData {
+        return users.find((u: IUserData) => u.friends && Boolean(u.friends.length));
+    }
+    
+    private getRandomUser(users: IUserData[]): IUser {
+        return users[this.getRandomIntInclusive(0, users.length - 1)].user;
+    }
+    
+    private getUser(): IUser {
+        return {
+            name: 'user name ' + this.getRandomIntInclusive(1, 100)
+        };
+    }
+    
+    private getNameToUpdate(): IUser {
+        return {
+            name: 'updated name ' + this.getRandomIntInclusive(1, 100)
+        };
+    }
+    
+    private getRandomIntInclusive(min: number, max: number): number {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    
+    private callbackFunc(callback, error = null): void {
+        if (error) {
+            console.error('error ', error);
+        }
+        if (callback && typeof callback === 'function') {
+            callback(error);
+        }
+    }
 }
 
-function main() {
-    var client = new ClientService(usersController);
+function main(): void {
+    const client: any = new ClientService(usersController);
     client.getDataUpdates();
     client.getDataOnConnect(
         client.applyInterestingScenario.bind(client)
@@ -261,4 +262,25 @@ function main() {
 
 if (require.main === module) {
   main();
+}
+
+export interface IUserData {
+    user: IUser;
+    friends: IUser[];
+}
+
+export interface IUser {
+    name: string;
+    id?: string;
+}
+
+export interface IResponse {
+    results: IUserData[]
+}
+
+export type ICallback = (data: IResponse) => void;
+
+export interface IEvent {
+    type: string;
+    data: IUserData[]
 }

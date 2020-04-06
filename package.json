@@ -2,20 +2,30 @@
   "name": "grpc-test-task",
   "version": "0.0.1",
   "scripts": {
-    "run-server": "cd server && node server.ts",
-    "run-client": "cd client && node client.ts",
+    "build": "rimraf dist && tsc && copyfiles \"static/**/**\" dist",
+    "run-server": "node dist/server/server",
+    "run-client": "node dist/client/client",
     "run-test": "npm test",
-    "test": "jest"
+    "test": "jest --watch"
   },
   "jest": {},
   "dependencies": {
     "@grpc/proto-loader": "^0.1.0",
     "async": "^1.5.2",
+    "copyfiles": "^2.2.0",
     "google-protobuf": "^3.0.0",
-    "grpc": "^1.11.0"
+    "grpc": "^1.11.0",
+    "tslint": "^6.1.1"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.8.3",
-    "jest": "^25.2.6"
+    "@types/jest": "^25.2.1",
+    "@types/node": "^13.11.0",
+    "jest": "^25.2.7",
+    "nodemon": "^2.0.2",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^25.3.1",
+    "ts-node": "^8.8.2",
+    "typescript": "^3.8.3"
   }
 }

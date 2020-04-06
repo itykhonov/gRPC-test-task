@@ -5,9 +5,9 @@ package userscontroller;
 // Interface exported by the server.
 service UsersController {
     rpc GetData(EmptyParams) returns (UserDatas) {}
-    rpc CreateUser(User) returns (UserData) {}
-    rpc UpdateUser(User) returns (UserData) {}
-    rpc DeleteUser(User) returns (UserData) {}
+    rpc CreateUser(User) returns (UserDatas) {}
+    rpc UpdateUser(User) returns (UserDatas) {}
+    rpc DeleteUser(User) returns (UserDatas) {}
     rpc AddFriendshipBtwUsers(Users) returns (UserDatas) {}
     rpc DeleteFrienshipBtwUsers(Users) returns (UserDatas) {}
 
@@ -38,7 +38,7 @@ message UserData {
 }
 
 message UserDatas {
-    repeated UserData userDatas = 1;
+    repeated UserData results = 1;
 }
 
 message Users {

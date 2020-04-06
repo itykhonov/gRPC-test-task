@@ -1,13 +1,13 @@
-var path = require('path');
-var StorageInst = require('./graph.ts').StorageService;
-var EE = require('./event-emitter.ts').EventEmitter;
-var FileServiceInst = require('./file-service.ts').FileService;
+const path = require('path');
+const grpc = require('grpc');
+const protoLoader = require('@grpc/proto-loader');
 
-var PROTO_PATH = path.resolve(__dirname + '/../protos/model.proto');
+import { EventEmitter } from './event-emitter';
+import { StorageService } from './graph';
+import { IResponse } from './file-service';
 
-var grpc = require('grpc');
-var protoLoader = require('@grpc/proto-loader');
-var packageDefinition = protoLoader.loadSync(
+const PROTO_PATH: string = path.resolve(__dirname + '/../static/model.proto');
+const packageDefinition: any = protoLoader.loadSync(
     PROTO_PATH,
     {
         keepCase: true,
@@ -16,74 +16,65 @@ var packageDefinition = protoLoader.loadSync(
         defaults: true,
         oneofs: true
     });
-var usersController = grpc.loadPackageDefinition(packageDefinition).userscontroller;
+const usersController: any = grpc.loadPackageDefinition(packageDefinition).userscontroller;
 
-class ServerService {
-    dataStorage;
-    eventEmitter;
+export class ServerService {
+    private storageService: StorageService = new StorageService();
+    private eventEmitter: EventEmitter = new EventEmitter();
 
-    constructor (StorageInst, EE, FileServiceInst) {
-        this.dataStorage = new StorageInst(FileServiceInst);
-        this.eventEmitter = new EE();
-    }
-
-    createUser(call, callback) {
-        this.dataStorage.addNode(call.request, (response) => {
+    public createUser(call: any, callback: () => void): void {
+        this.storageService.addNode(call.request, (response) => {
             this.callback("CREATED_USER", callback, response);
         });
     }
 
-    updateUser(call, callback) {
-        this.dataStorage.updateNode(call.request, (response) => {
+    public updateUser(call: any, callback: () => void): void {
+        this.storageService.updateNode(call.request, (response) => {
             this.callback("UPDATED_USER", callback, response);
         });
     }
 
-    deleteUser(call, callback) {
-        this.dataStorage.deleteNode(call.request, (response) => {
+    public deleteUser(call: any, callback: () => void): void {
+        this.storageService.deleteNode(call.request, (response) => {
             this.callback("DELETED_USER", callback, response);
         });
     }
 
-    addFriendshipBtwUsers(call, callback) {
-        this.dataStorage.addLinkBtwNodes(call.request.users, (response) => {
+    public addFriendshipBtwUsers(call: any, callback: () => void): void {
+        this.storageService.addLinkBtwNodes(call.request.users, (response) => {
             this.callback("CREATED_LINK", callback, response);
         });
     }
 
-    deleteFrienshipBtwUsers(call, callback) {
-        this.dataStorage.deleteLinkBtwNodes(call.request.users, (response) => {
+    public deleteFrienshipBtwUsers(call: any, callback: () => void): void {
+        this.storageService.deleteLinkBtwNodes(call.request.users, (response) => {
             this.callback("DELETED_LINK", callback, response);
         });
     }
 
-    getData(call, callback) {
-        this.dataStorage.getData((response) => {
+    public getData(call: any, callback: () => void): void {
+        this.storageService.getData((response: IResponse) => {
             this.callback("DATA_RETURNED", callback, response);
         });
     }
 
-    pushDateUpdates(call) {
+    public pushDateUpdates(call: any): void {
         console.log("USER_SUBSCRIBED --- *******");
         this.eventEmitter.addDispatcher(call);
     }
 
-    callback(type, callback, response) {
+    public callback(type: string, callback: (err: Error, response: IResponse) => void, response: IResponse): void {
         this.eventEmitter.dispatch({
             type: type,
-            data: response && response.userDatas ? response.userDatas : response,
+            data: response.results,
         });
         callback(null, response);
     }
 }
 
-function getServer() {
-    var server = new grpc.Server();
-    var serverClassInst = new ServerService(
-        StorageInst,
-        EE,
-        FileServiceInst,
-    );
+function getServer(): any {
+    const server: any = new grpc.Server();
+    const serverClassInst: ServerService = new ServerService();
     server.addProtoService(usersController.UsersController.service, {
         createUser: serverClassInst.createUser.bind(serverClassInst),
         updateUser: serverClassInst.updateUser.bind(serverClassInst),
@@ -98,10 +89,7 @@ function getServer() {
 
 if (require.main === module) {
     // If this is run as a script, start a server on an unused port
-    var grpcServer = getServer();
+    const grpcServer: any = getServer();
     grpcServer.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
     grpcServer.start();
 }
-
-exports.getServer = getServer;
-exports.ServerService = ServerService;

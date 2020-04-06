@@ -3,6 +3,8 @@
 # dependencies
 /node_modules
 
+/dist
+
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json

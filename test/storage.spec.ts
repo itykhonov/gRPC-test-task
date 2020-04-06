@@ -1,5 +1,5 @@
-var FileService = require('../file-service.ts').FileService;
-var StorageService = require('../graph.ts').StorageService;
+import { FileService } from '../server/file-service';
+import { StorageService } from '../server/graph';
 
 describe("test methods of StorageService instance", () => {
     var storageInst;
@@ -10,9 +10,7 @@ describe("test methods of StorageService instance", () => {
         FileService.prototype.readData = mockFuncReadDataFromDB;
         FileService.prototype.writeData = mockFuncWriteDataToDB;
 
-        storageInst = new StorageService(
-            FileService
-        );
+        storageInst = new StorageService();
     });
 
     beforeEach(() => {
@@ -63,8 +61,7 @@ describe("test methods of StorageService instance", () => {
         );
 
         expect(mockFuncWriteDataToDB).not.toHaveBeenCalled();
-        expect(mockCallbackFunc).toHaveBeenCalled();
-        expect(mockCallbackFunc).toHaveBeenCalledWith();
+        expect(mockCallbackFunc).not.toHaveBeenCalled();
     });
 
     it("deletedLinkBtwNodes callback after node link deleted, delete link btw nodes data method called, callback function called", () => {
@@ -127,7 +124,7 @@ describe("test methods of StorageService instance", () => {
         ]);
         expect(mockCallbackFunc).toHaveBeenCalled();
         expect(mockCallbackFunc).toHaveBeenCalledWith({
-            userDatas: [
+            results: [
                 {
                     user: {
                         name: 'test',
@@ -178,8 +175,7 @@ describe("test methods of StorageService instance", () => {
         );
 
         expect(mockFuncWriteDataToDB).not.toHaveBeenCalled();
-        expect(mockCallbackFunc).toHaveBeenCalled();
-        expect(mockCallbackFunc).toHaveBeenCalledWith();
+        expect(mockCallbackFunc).not.toHaveBeenCalled();
     });
 
     it("addedLinkBtwNodes callback after node link added, add link btw nodes data method called, callback function called", () => {
@@ -242,7 +238,7 @@ describe("test methods of StorageService instance", () => {
         ]);
         expect(mockCallbackFunc).toHaveBeenCalled();
         expect(mockCallbackFunc).toHaveBeenCalledWith({
-            userDatas: [
+            results: [
                 {
                     user: {
                         name: 'test',
@@ -290,8 +286,7 @@ describe("test methods of StorageService instance", () => {
         );
 
         expect(mockFuncWriteDataToDB).not.toHaveBeenCalled();
-        expect(mockCallbackFunc).toHaveBeenCalled();
-        expect(mockCallbackFunc).toHaveBeenCalledWith();
+        expect(mockCallbackFunc).not.toHaveBeenCalled();
     });
 
     it("deleteNode callback after node deleted, if alreay exists link with deleted node", () => {
@@ -340,20 +335,22 @@ describe("test methods of StorageService instance", () => {
             },
         ]);
         expect(mockCallbackFunc).toHaveBeenCalled();
-        expect(mockCallbackFunc).toHaveBeenCalledWith([
-            {
-                user: {
-                    name: 'test',
-                    id: 'test id'
-                },
-                friends: [
-                    {
+        expect(mockCallbackFunc).toHaveBeenCalledWith({
+            results: [
+                {
+                    user: {
                         name: 'test',
-                        id: 'another test id'
-                    }
-                ]
-            }
-        ]);
+                        id: 'test id'
+                    },
+                    friends: [
+                        {
+                            name: 'test',
+                            id: 'another test id'
+                        }
+                    ]
+                }
+            ]
+        });
     });
 
     it("deleteNode callback after node deleted, delete data method called, callback function called", () => {
@@ -377,15 +374,17 @@ describe("test methods of StorageService instance", () => {
         expect(mockFuncWriteDataToDB).toHaveBeenCalled();
         expect(mockFuncWriteDataToDB).toHaveBeenCalledWith([]);
         expect(mockCallbackFunc).toHaveBeenCalled();
-        expect(mockCallbackFunc).toHaveBeenCalledWith([
-            {
-                user: {
-                    name: 'test',
-                    id: 'test id'
-                },
-                friends: []
-            }
-        ]);
+        expect(mockCallbackFunc).toHaveBeenCalledWith({
+            results: [
+                {
+                    user: {
+                        name: 'test',
+                        id: 'test id'
+                    },
+                    friends: []
+                }
+            ]
+        });
     });
 
     it("updateNode callback after data updated, update data method called, callback function called", () => {
@@ -419,8 +418,8 @@ describe("test methods of StorageService instance", () => {
             ]
         );
         expect(mockCallbackFunc).toHaveBeenCalled();
-        expect(mockCallbackFunc).toHaveBeenCalledWith(
-            [
+        expect(mockCallbackFunc).toHaveBeenCalledWith({
+            results: [
                 {
                     user: {
                         name: 'updated test name',
@@ -429,7 +428,7 @@ describe("test methods of StorageService instance", () => {
                     friends: []
                 }
             ]
-        );
+        });
     });
 
     it("addNode to db callback after data readed, write data to db method called, callback function called", () => {
@@ -454,15 +453,17 @@ describe("test methods of StorageService instance", () => {
         );
         expect(mockCallbackFunc).toHaveBeenCalled();
         expect(mockCallbackFunc).toHaveBeenCalledWith(
-            [
-                {
-                    user: {
-                        name: 'test',
-                        id: 'test id'
-                    },
-                    friends: []
-                }
-            ]
+            {
+                results: [
+                    {
+                        user: {
+                            name: 'test',
+                            id: 'test id'
+                        },
+                        friends: []
+                    }
+                ]
+            }
         );
     });
 

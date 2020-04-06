@@ -1,49 +1,43 @@
-class StorageService {
-    storage;
-    constructor(FileServiceInst) {
-        this.storage = new FileServiceInst();
-    }
+import { FileService, IUserData, IUser, ICallback} from './file-service';
 
-    getId() {
-        return Date.now() + '-id';
-    }
+export class StorageService {
+    private fileService = new FileService();
 
-    getData(callback) {
-        this.storage.readData((data) => {
-            callback({ userDatas: data });
+    public getData(callback: ICallback): void {
+        this.fileService.readData((data: IUserData[]) => {
+            callback({ results: data });
         });
     }
 
-    addNode(node, callback) {
-        this.storage.readData((data) => {
+    public addNode(node: IUser, callback: ICallback): void {
+        this.fileService.readData((data: IUserData[]) => {
             this.onAddedNode(data, node, callback);
         });
     }
 
-    onAddedNode(data, node, callback) {
-        var userData = {
+    public onAddedNode(data: IUserData[], node: IUser, callback: ICallback): void {
+        const userData: IUserData = {
             user: Object.assign(node, {id: this.getId()}),
             friends: []
         };
         data.push(userData);
-        this.storage.writeData(data);
-        callback([userData]);
+        this.fileService.writeData(data);
+        callback({ results: [userData] });
     }
 
-    updateNode(node, callback) {
-        this.storage.readData((data) => {
+    public updateNode(node: IUser, callback: ICallback): void {
+        this.fileService.readData((data) => {
             this.onUpdatedNode(data, node, callback);
         });
     }
 
-    onUpdatedNode(data, node, callback) {
+    public onUpdatedNode(data: IUserData[], node: IUser, callback: ICallback): void {
         if (!this.isNodeExist(data, node.id)) {
             console.error('User with id - ' + node.id + ' does not exist');
-            callback();
             return;
         }
-        var updatedUserData;
-        data = data.map(el => {
+        let updatedUserData: IUserData;
+        data = data.map((el: IUserData) => {
             if (el.user.id === node.id) {
                 updatedUserData = {
                     user: node,
@@ -53,59 +47,57 @@ class StorageService {
             }
             return el;
         });
-        this.storage.writeData(data);
-        callback([updatedUserData]);
+        this.fileService.writeData(data);
+        callback({results: [updatedUserData]});
     }
 
-    deleteNode(node, callback) {
-        this.storage.readData((data) => {
+    public deleteNode(node: IUser, callback: ICallback): void {
+        this.fileService.readData((data: IUserData[]) => {
             this.onDeletedNode(data, node, callback);
         });
     }
 
-    onDeletedNode(data, node, callback) {
+    public onDeletedNode(data: IUserData[], node: IUser, callback: ICallback): void {
         if (!this.isNodeExist(data, node.id)) {
             console.error('User with id - ' + node.id + ' does not exist')
-            callback();
             return;
         }
-        var deletedNode;
-        data = data.map(el => {
-            el.friends = el.friends.filter(f => f.id !== node.id);
+        let deletedNode: IUserData;
+        data = data.map((el: IUserData) => {
+            el.friends = el.friends.filter((f: IUser) => f.id !== node.id);
             return el;
-        }).filter(el => {
+        }).filter((el: IUserData) => {
             if (el.user.id === node.id) {
                 deletedNode = el;
                 return false;
             }
             return true;
         });
-        this.storage.writeData(data);
-        callback([deletedNode]);
+        this.fileService.writeData(data);
+        callback({results: [deletedNode]});
     }
 
-    addLinkBtwNodes(users, callback) {
-        this.storage.readData((data) => {
+    public addLinkBtwNodes(users: IUser[], callback: ICallback): void {
+        this.fileService.readData((data: IUserData[]) => {
             this.onAddedLinkBtwNodes(data, users, callback)
         });
     }
 
-    onAddedLinkBtwNodes(data, users, callback) {
-        var isUsersExist = users.every(u => this.isNodeExist(data, u.id));
+    public onAddedLinkBtwNodes(data: IUserData[], users: IUser[], callback: ICallback): void {
+        const isUsersExist: boolean = users.every((u: IUser) => this.isNodeExist(data, u.id));
         if (!isUsersExist) {
-            console.error('Some of users for linking does not exist')
-            callback();
+            console.error('Some of users for linking does not exist');
             return;
         }
-        var user1 = data.find(u => u.user.id === users[0].id);
-        var user2 = data.find(u => u.user.id === users[1].id);
-        if (!user1.friends.some(f => f.id === users[1].id)) {
+        const user1: IUserData = data.find((u: IUserData) => u.user.id === users[0].id);
+        const user2: IUserData = data.find((u: IUserData) => u.user.id === users[1].id);
+        if (!user1.friends.some((f: IUser) => f.id === users[1].id)) {
             user1.friends.push(users[1]);
         }
-        if (!user2.friends.some(f => f.id === users[0].id)) {
+        if (!user2.friends.some((f: IUser) => f.id === users[0].id)) {
             user2.friends.push(users[0]);
         }
-        data = data.map(el => {
+        data = data.map((el: IUserData) => {
             if (el.user.id === user1.user.id) {
                 return user1;
             }
@@ -114,32 +106,31 @@ class StorageService {
             }
             return el;
         });
-        this.storage.writeData(data);
-        callback({ userDatas: [user1, user2] });
+        this.fileService.writeData(data);
+        callback({ results: [user1, user2] });
     }
 
-    deleteLinkBtwNodes(users, callback) {
-        this.storage.readData((data) => {
+    public deleteLinkBtwNodes(users: IUser[], callback: ICallback): void {
+        this.fileService.readData((data: IUserData[]) => {
             this.onDeletedLinkBtwNodes(data, users, callback)
         });
     }
 
-    onDeletedLinkBtwNodes(data, users, callback) {
-        var isUsersExist = users.every(u => this.isNodeExist(data, u.id));
+    public onDeletedLinkBtwNodes(data: IUserData[], users: IUser[], callback: ICallback): void {
+        const isUsersExist: boolean = users.every((u: IUser) => this.isNodeExist(data, u.id));
         if (!isUsersExist) {
             console.error('Some of users for linking does not exist');
-            callback();
             return;
         }
-        var user1 = data.find(u => u.user.id === users[0].id);
-        var user2 = data.find(u => u.user.id === users[1].id);
-        if (user1.friends.some(f => f.id === users[1].id)) {
-            user1.friends = user1.friends.filter(f => f.id !== users[1].id);
+        const user1: IUserData = data.find((u: IUserData) => u.user.id === users[0].id);
+        const user2: IUserData = data.find((u: IUserData) => u.user.id === users[1].id);
+        if (user1.friends.some((f: IUser) => f.id === users[1].id)) {
+            user1.friends = user1.friends.filter((f: IUser) => f.id !== users[1].id);
         }
-        if (user2.friends.some(f => f.id === users[0].id)) {
-            user2.friends = user2.friends.filter(f => f.id !== users[0].id);
+        if (user2.friends.some((f: IUser) => f.id === users[0].id)) {
+            user2.friends = user2.friends.filter((f: IUser) => f.id !== users[0].id);
         }
-        data = data.map(el => {
+        data = data.map((el: IUserData) => {
             if (el.user.id === user1.user.id) {
                 return user1;
             }
@@ -148,13 +139,15 @@ class StorageService {
             }
             return el;
         })
-        this.storage.writeData(data);
-        callback({ userDatas: [user1, user2] });
+        this.fileService.writeData(data);
+        callback({ results: [user1, user2] });
     }
 
-    isNodeExist(data, id) {
+    public isNodeExist(data: IUserData[], id: string): boolean {
         return data.some(el => el.user.id === id);
     }
-}
 
-exports.StorageService = StorageService;
+    public getId(): string {
+        return Date.now() + '-id';
+    }
+}

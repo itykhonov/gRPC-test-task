@@ -11,7 +11,10 @@ Implementation of a client and server program that can maintain the state of a g
 1. Install latest Node and NPM
 2. Install all dependencies `npm install`
 
-### Running
+### Build and Running
+
+#### Build
+1. Run `npm run build` build project to dist folder
 
 #### Server
 1. Run `npm run run-server` starts grpc server instance

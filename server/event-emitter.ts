@@ -1,15 +1,19 @@
-// create a EventEmitter class 
-class EventEmitter {
-    dispatchers = [];
+import { IUserData } from './file-service';
 
-    addDispatcher(dispatcher) {
+export class EventEmitter {
+    private dispatchers: any = [];
+
+    public addDispatcher(dispatcher: any): void {
         this.dispatchers.push(dispatcher);
     }
 
-    dispatch (event) {
+    public dispatch (event: IEvent): void {
         console.log(event.type);
-        this.dispatchers.forEach(d => d.write(event));
+        this.dispatchers.forEach((d: any) => d.write(event));
     }
 }
 
-exports.EventEmitter = EventEmitter;
+export interface IEvent {
+    type: string;
+    data: IUserData[]
+}

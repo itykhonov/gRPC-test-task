@@ -1,7 +1,6 @@
-var ServerService = require('../server.ts').ServerService;
-var EE = require('../event-emitter.ts').EventEmitter;
-var FileService = require('../file-service.ts').FileService;
-var StorageService = require('../graph.ts').StorageService;
+import { ServerService } from '../server/server';
+import { EventEmitter } from '../server/event-emitter';
+import { StorageService } from '../server/graph';
 
 describe("test methods of ServerService instance", () => {
     var serverInst;
@@ -14,15 +13,10 @@ describe("test methods of ServerService instance", () => {
         StorageService.prototype.addLinkBtwNodes = mockFunc;
         StorageService.prototype.deleteLinkBtwNodes = mockFunc;
         StorageService.prototype.getData = mockFunc;
-        StorageService.prototype.pushDateUpdates = mockFunc;
-        EE.prototype.dispatch = mockFunc;
-        EE.prototype.addDispatcher = mockFunc;
+        EventEmitter.prototype.dispatch = mockFunc;
+        EventEmitter.prototype.addDispatcher = mockFunc;
 
-        serverInst = new ServerService(
-            StorageService,
-            EE,
-            FileService
-        );
+        serverInst = new ServerService();
     });
 
     it("create user, storage addNode method called", () => {
